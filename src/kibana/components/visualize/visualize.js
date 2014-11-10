@@ -105,7 +105,11 @@ define(function (require) {
 
         $scope.$watch('esResp', prereq(function (resp, prevResp) {
           if (!resp) return;
-          $scope.renderbot.render(resp);
+          if (!resp.hits || !resp.hits.total) {
+            return;
+          } else {
+            $scope.renderbot.render(resp);
+          }
         }));
 
         $scope.$watch('renderbot', function (newRenderbot, oldRenderbot) {
