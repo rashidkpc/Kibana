@@ -28,6 +28,13 @@ define(function (require) {
           ]
         },
         {
+          group: 'metrics',
+          name: 'radius',
+          title: 'Dot Size',
+          min: 0,
+          max: 1
+        },
+        {
           group: 'buckets',
           name: 'segment',
           title: 'X-Axis',

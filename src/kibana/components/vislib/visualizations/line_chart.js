@@ -27,7 +27,7 @@ define(function (require) {
 
       // Line chart specific attributes
       this._attr = _.defaults(handler._attr || {}, {
-        interpolate: 'linear',
+        interpolate: 'cardinal',
         xValue: function (d) { return d.x; },
         yValue: function (d) { return d.y; }
       });
@@ -70,11 +70,22 @@ define(function (require) {
       var yScale = this.handler.yAxis.yScale;
       var ordered = this.handler.data.get('ordered');
       var circleRadius = 4;
-      var circleStrokeWidth = 1;
+      var circleStrokeWidth = 3;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
       var layer;
       var circles;
+      var radii = _.flatten(_.map(data, function (series) {
+        return _.map(series, function (point) { return point._input.radius; });
+      }));
+      radii = {
+        min: _.min(radii),
+        max: _.max(radii)
+      };
+      var radiusStep = ((radii.max - radii.min) || (radii.max * 100)) / 20;
+
+
+
 
       layer = svg.selectAll('.points')
       .data(data)
@@ -116,7 +127,11 @@ define(function (require) {
       .attr('cy', function cy(d) {
         return yScale(d.y);
       })
-      .attr('r', circleRadius);
+      .attr('r', function radius(d) {
+        var circleRadius = (d._input.radius - radii.min) / radiusStep;
+
+        return (circleRadius || 2) + 2;
+      });
 
       if (isTooltip) {
         circles.call(tooltip.render());
@@ -172,7 +187,9 @@ define(function (require) {
       .attr('stroke', function lineStroke(d) {
         return color(d.label);
       })
-      .attr('stroke-width', 2);
+      .attr('stroke-width', function (d) {
+        return 3;
+      });
 
       return lines;
     };
