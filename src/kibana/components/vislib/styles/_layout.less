@@ -85,7 +85,19 @@
   .flex-direction(column);
   min-height: 0;
   min-width: 0;
-  margin-right: 8px;
+}
+
+
+.chart-wrapper-column, .x-axis-div-wrapper {
+  > div:not(:last-child) {
+    border-right: 1px solid #ddd;
+  }
+}
+
+.chart-wrapper-row, .y-axis-div-wrapper  {
+  > div:not(:first-child) {
+    border-top: 1px solid #ddd;
+  }
 }
 
 .chart-wrapper {
