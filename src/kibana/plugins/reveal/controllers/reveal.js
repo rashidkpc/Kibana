@@ -3,12 +3,12 @@ define(function (require) {
   var angular = require('angular');
   var $ = require('jquery');
 
-  var app = require('modules').get('apps/goto', [
+  var app = require('modules').get('apps/reveal', [
   ]);
 
   require('routes')
-  .when('/goto', {
-    template: require('text!plugins/goto/index.html'),
+  .when('/reveal', {
+    template: require('text!plugins/reveal/index.html'),
     reloadOnSearch: false
   });
 
