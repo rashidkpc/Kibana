@@ -46,6 +46,7 @@ module.exports = function (grunt) {
       '<%= src %>/kibana/components/vislib/styles/main.less',
       '<%= plugins %>/dashboard/styles/main.less',
       '<%= plugins %>/discover/styles/main.less',
+      '<%= plugins %>/goto/styles/main.less',
       '<%= plugins %>/settings/styles/main.less',
       '<%= plugins %>/visualize/styles/main.less',
       '<%= plugins %>/visualize/styles/visualization.less',
