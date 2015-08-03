@@ -1,5 +1,3 @@
-'use strict';
-
 var _ = require('lodash');
 var moment = require('moment');
 
@@ -100,7 +98,7 @@ module.exports = {
   }
 };
 
-function buildRequest (config, tlConfig) {
+function buildRequest(config, tlConfig) {
   var filter = {range:{}};
   filter.range[tlConfig.file.es.timefield] = {gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis'};
 
