@@ -34,7 +34,8 @@
   "scripts": {
     "test": "grunt test",
     "start": "node ./src/server/cli/index.js --dev",
-    "precommit": "grunt lintStagedFiles"
+    "precommit": "grunt lintStagedFiles",
+    "karma": "karma start"
   },
   "repository": {
     "type": "git",
@@ -120,7 +121,8 @@
   },
   "devDependencies": {
     "auto-release-sinon": "^1.0.3",
-    "eslint": "^1.0.0",
+    "babel-eslint": "^4.0.5",
+    "eslint": "1.0.x",
     "expect.js": "^0.3.1",
     "faker": "^1.1.0",
     "grunt": "^0.4.5",
@@ -128,12 +130,13 @@
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-compress": "^0.13.0",
     "grunt-contrib-copy": "^0.8.0",
-    "grunt-esvm": "^1.0.1",
+    "grunt-esvm": "^1.1.3",
     "grunt-karma": "^0.12.0",
     "grunt-replace": "^0.7.9",
     "grunt-run": "spalger/grunt-run#master",
     "grunt-s3": "^0.2.0-alpha.3",
     "grunt-simple-mocha": "^0.4.0",
+    "gruntify-eslint": "^1.0.0",
     "html-entities": "^1.1.1",
     "husky": "^0.8.1",
     "karma": "^0.13.3",
