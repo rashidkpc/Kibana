@@ -30,8 +30,10 @@ module.exports = function (server) {
     }
 
     const ssl = { rejectUnauthorized: options.verifySsl };
-    if (options.clientCrt && options.clientKey) {
+    if (options.clientCrt) {
       ssl.cert = readFile(options.clientCrt);
+    }
+    if (options.clientKey) {
       ssl.key = readFile(options.clientKey);
     }
     if (options.ca) {
@@ -62,7 +64,7 @@ module.exports = function (server) {
   const client = createClient();
   server.on('close', _.bindKey(client, 'close'));
 
-  const noAuthClient = createClient({ auth: false });
+  const noAuthClient = createClient({ auth: false, clientKey: false });
   server.on('close', _.bindKey(noAuthClient, 'close'));
 
   server.expose('client', client);
