@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import d3TagCloud from 'd3-cloud';
 import vislibComponentsSeedColorsProvider from 'ui/vislib/components/color/seed_colors';
-import {EventEmitter} from 'events';
+import { EventEmitter } from 'events';
 
 
 const ORIENTATIONS = {
@@ -129,8 +129,23 @@ class TagCloud extends EventEmitter {
 
     const job = this._queue.pop();
     this._inFlight = true;
-    this._onLayoutEnd(job);
 
+    if (job.words.length) {
+      this._onLayoutEnd(job);
+    } else {
+      this._emptyCloud(job);
+    }
+
+  }
+
+  _emptyCloud(job) {
+    this._svgGroup.selectAll('text').remove();
+    this._cloudWidth = 0;
+    this._cloudHeight = 0;
+    this._allInViewBox = true;
+    this._inFlight = false;
+    this._currentJob = job;
+    this._processQueue();
   }
 
   _onLayoutEnd(job) {
@@ -211,7 +226,7 @@ class TagCloud extends EventEmitter {
       resolveWhenDone();
     });
 
-  };
+  }
 
   _makeTextSizeMapper() {
     const mapSizeToFontSize = D3_SCALING_FUNCTIONS[this._textScale]();
@@ -299,14 +314,14 @@ class TagCloud extends EventEmitter {
 
 }
 
-TagCloud.STATUS = {COMPLETE: 0, INCOMPLETE: 1};
+TagCloud.STATUS = { COMPLETE: 0, INCOMPLETE: 1 };
 
 function seed() {
   return 0.5;//constant seed (not random) to ensure constant layouts for identical data
 }
 
 function toWordTag(word) {
-  return {value: word.value, text: word.text};
+  return { value: word.value, text: word.text };
 }
 
 
@@ -349,7 +364,7 @@ function hashCode(string) {
     return hash;
   }
   for (let i = 0; i < string.length; i++) {
-    let char = string.charCodeAt(i);
+    const char = string.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
     hash = hash & hash; // Convert to 32bit integer
   }
