@@ -46,7 +46,17 @@ module.exports = function (tlConfig) {
               stats.queryCount++;
               return Promise.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
             }
-            return invoke(item.function, item.arguments);
+            // This is basically a failsafe, in case something didn't end up in the cache,
+            // though everything should. I think i can abuse this to built partial functions.
+
+            // Only invoke the function if it's a datasource. Ya dig?
+            if (itemFunctionDef.datasource) {
+              return invoke(item.function, item.arguments);
+            } else {
+              // We need to return a function here. That function should take 1 arg right?
+              // TODO: this doesn't work at all, and doesn't make any sense
+              return function (inputSeries) { return inputSeries; };
+            }
           }
           case 'reference': {
             let reference;
@@ -61,9 +71,9 @@ module.exports = function (tlConfig) {
             return invoke('first', [reference]);
           }
           case 'chain':
-            return invokeChain(item);
+            return invokeChain(item); // Turn item into a function
           case 'chainList':
-            return resolveChainList(item.list);
+            return resolveChainList(item.list); // List should be an array of functions
           case 'literal':
             return item.value;
           case 'requestList':
