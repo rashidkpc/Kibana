@@ -10,8 +10,14 @@ module.exports = function repositionArguments(functionDef, unorderedArgs) {
     let value;
     let storeAsArray;
 
+    function unknownArg() {
+      return new Error('Unknown argument to ' + functionDef.name + ': ' + (unorderedArg.name || ('#' + i)));
+    }
+
     if (_.isObject(unorderedArg) && unorderedArg.type === 'namedArg') {
       argDef = functionDef.argsByName[unorderedArg.name];
+      if (!argDef) throw unknownArg();
+
 
       if (!argDef) {
         if (functionDef.extended) {
@@ -34,12 +40,13 @@ module.exports = function repositionArguments(functionDef, unorderedArgs) {
       value = unorderedArg.value;
     } else {
       argDef = functionDef.args[i];
+      if (!argDef) throw unknownArg();
+
       storeAsArray = argDef.multi;
       targetIndex = i;
       value = unorderedArg;
     }
 
-    if (!argDef) throw new Error('Unknown argument to ' + functionDef.name + ': ' + (unorderedArg.name || ('#' + i)));
 
     if (storeAsArray) {
       args[targetIndex] = args[targetIndex] || [];
