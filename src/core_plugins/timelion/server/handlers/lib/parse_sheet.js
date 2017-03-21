@@ -8,7 +8,9 @@ const Parser = PEG.buildParser(grammar);
 module.exports = function parseSheet(sheet) {
   return _.map(sheet, function (plot) {
     try {
-      return Parser.parse(plot).tree;
+      const parsed = Parser.parse(plot);
+      console.log(JSON.stringify(parsed, null, ' '));
+      return parsed.tree;
     } catch (e) {
       let message;
       if (e.expected) {

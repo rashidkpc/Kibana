@@ -32,31 +32,25 @@ module.exports = function (tlConfig) {
   // Invokes a modifier function, resolving arguments into series as needed
   function invoke(fnName, args) {
     const functionDef = tlConfig.server.plugins.timelion.getFunction(fnName);
+    const argDefs = functionDef.args;
 
-    function resolveArgument(item) {
+    // Arguments have already been repositioned when they come in here.
+    function resolveArgument(item, argDef) { // Would be really nice to have the argDef here.
+
       if (_.isArray(item)) {
-        return Promise.all(_.map(item, resolveArgument));
+        return Promise.all(_.map(item, function (arg) { return resolveArgument(arg, argDef); }));
       }
 
       if (_.isObject(item)) {
         switch (item.type) {
+          // I think this exists because of the usage of .first(). Can we get rid of .first()?
           case 'function': {
             const itemFunctionDef = tlConfig.server.plugins.timelion.getFunction(item.function);
             if (itemFunctionDef.cacheKey && queryCache[itemFunctionDef.cacheKey(item)]) {
               stats.queryCount++;
               return Promise.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
             }
-            // This is basically a failsafe, in case something didn't end up in the cache,
-            // though everything should. I think i can abuse this to built partial functions.
-
-            // Only invoke the function if it's a datasource. Ya dig?
-            if (itemFunctionDef.datasource) {
-              return invoke(item.function, item.arguments);
-            } else {
-              // We need to return a function here. That function should take 1 arg right?
-              // TODO: this doesn't work at all, and doesn't make any sense
-              return function (inputSeries) { return inputSeries; };
-            }
+            return invoke(item.function, item.arguments);
           }
           case 'reference': {
             let reference;
@@ -71,7 +65,23 @@ module.exports = function (tlConfig) {
             return invoke('first', [reference]);
           }
           case 'chain':
-            return invokeChain(item); // Turn item into a function
+            // Should return a seriesList or a JS function
+            // If arg.type == seriesList
+            console.log(argDef.types);
+            return invokeChain(item);
+
+            // If arg.type == partial
+            // Ok, so args can't accept a seriesList AND a partial.
+            // Get first function in chain
+            // Get definition of that
+            /*
+            const firstLink = item[0];
+            const invokable = function (resolvedArgs) { return invoke(link.function, resolvedArgs); };
+
+
+            invokable.functionDef = linkFnDef;
+            return invokable;
+            */
           case 'chainList':
             return resolveChainList(item.list); // List should be an array of functions
           case 'literal':
@@ -88,7 +98,7 @@ module.exports = function (tlConfig) {
 
     args = repositionArguments(functionDef, args);
 
-    args = _.map(args, resolveArgument);
+    args = _.map(args, function (arg, i) { return resolveArgument(arg, argDefs[i]); });
 
     return Promise.all(args).then(function (args) {
       args.byName = indexArguments(functionDef, args);
@@ -105,9 +115,11 @@ module.exports = function (tlConfig) {
     let promise;
     if (link.type === 'chain') {
       promise = invokeChain(link);
-    } else if (!result) {
+    } else if (!result) { // this is the start of the chain
+      const linkFnDef = tlConfig.server.plugins.timelion.getFunction(link.function);
+      if (!linkFnDef.datasource) throw new Error('Invoked chains must start with a datasource function');
       promise = invoke('first', [link]);
-    } else {
+    } else { // We're at least on the 2nd function in the chain
       const args = link.arguments ? result.concat(link.arguments) : result;
       promise = invoke(link.function, args);
     }
