@@ -31,7 +31,7 @@ start
  }
 
 arg_list
- = first:argument rest:(space? ',' space? arg:argument)* space? ','? {
+ = first:argument rest:(space? ',' space? arg:argument {return arg})* space? ','? {
   return [first].concat(rest);
  }
 
