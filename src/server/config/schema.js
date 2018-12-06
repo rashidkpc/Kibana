@@ -203,6 +203,12 @@ export default () => Joi.object({
     data: Joi.string().default(getData())
   }).default(),
 
+  migrations: Joi.object({
+    batchSize: Joi.number().default(100),
+    scrollDuration: Joi.string().default('15m'),
+    pollInterval: Joi.number().default(1500),
+  }).default(),
+
   optimize: Joi.object({
     enabled: Joi.boolean().default(true),
     bundleFilter: Joi.string().default('!tests'),
@@ -214,17 +220,6 @@ export default () => Joi.object({
     watchPrebuild: Joi.boolean().default(false),
     watchProxyTimeout: Joi.number().default(5 * 60000),
     useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
-    unsafeCache: Joi.when('$prod', {
-      is: true,
-      then: Joi.boolean().valid(false),
-      otherwise: Joi
-        .alternatives()
-        .try(
-          Joi.boolean(),
-          Joi.string().regex(/^\/.+\/$/)
-        )
-        .default(true),
-    }),
     sourceMaps: Joi.when('$prod', {
       is: true,
       then: Joi.boolean().valid(false),

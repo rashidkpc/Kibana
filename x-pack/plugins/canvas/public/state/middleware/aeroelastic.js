@@ -7,12 +7,13 @@
 import { shallowEqual } from 'recompose';
 import { aeroelastic as aero } from '../../lib/aeroelastic_kibana';
 import { matrixToAngle } from '../../lib/aeroelastic/matrix';
+import { identity } from '../../lib/aeroelastic/functional';
 import {
   addElement,
-  removeElement,
+  removeElements,
   duplicateElement,
   elementLayer,
-  setPosition,
+  setMultiplePositions,
   fetchAllRenderables,
 } from '../actions/elements';
 import { restoreHistory } from '../actions/history';
@@ -65,38 +66,50 @@ const elementToShape = (element, i) => {
   };
 };
 
-const updateGlobalPositions = (setPosition, { shapes, gestureEnd }, elems) => {
-  shapes.forEach((shape, i) => {
-    const elemPos = elems[i] && elems[i].position;
-    if (elemPos && gestureEnd) {
-      // get existing position information from element
-      const oldProps = {
-        left: elemPos.left,
-        top: elemPos.top,
-        width: elemPos.width,
-        height: elemPos.height,
-        angle: Math.round(elemPos.angle),
-      };
+const updateGlobalPositions = (setMultiplePositions, { shapes, gestureEnd }, unsortedElements) => {
+  const ascending = (a, b) => (a.id < b.id ? -1 : 1);
+  const relevant = s => s.type !== 'annotation' && s.subtype !== 'adHocGroup';
+  const elements = unsortedElements.filter(relevant).sort(ascending);
+  const repositionings = shapes
+    .filter(relevant)
+    .sort(ascending)
+    .map((shape, i) => {
+      const element = elements[i];
+      const elemPos = element && element.position;
+      if (elemPos && gestureEnd) {
+        // get existing position information from element
+        const oldProps = {
+          left: elemPos.left,
+          top: elemPos.top,
+          width: elemPos.width,
+          height: elemPos.height,
+          angle: Math.round(elemPos.angle),
+        };
 
-      // cast shape into element-like object to compare
-      const newProps = {
-        left: shape.transformMatrix[12] - shape.a,
-        top: shape.transformMatrix[13] - shape.b,
-        width: shape.a * 2,
-        height: shape.b * 2,
-        angle: Math.round(matrixToAngle(shape.transformMatrix)),
-      };
+        // cast shape into element-like object to compare
+        const newProps = {
+          left: shape.transformMatrix[12] - shape.a,
+          top: shape.transformMatrix[13] - shape.b,
+          width: shape.a * 2,
+          height: shape.b * 2,
+          angle: Math.round(matrixToAngle(shape.transformMatrix)),
+        };
 
-      if (!shallowEqual(oldProps, newProps)) setPosition(shape.id, newProps);
-    }
-  });
+        if (1 / newProps.angle === -Infinity) newProps.angle = 0; // recompose.shallowEqual discerns between 0 and -0
+
+        return shallowEqual(oldProps, newProps)
+          ? null
+          : { position: newProps, elementId: shape.id };
+      }
+    })
+    .filter(identity);
+  if (repositionings.length) setMultiplePositions(repositionings);
 };
 
 const id = element => element.id;
 
 export const aeroelastic = ({ dispatch, getState }) => {
   // When aeroelastic updates an element, we need to dispatch actions to notify redux of the changes
-  // dispatch(setPosition({ ... }));
 
   const onChangeCallback = ({ state }) => {
     const nextScene = state.currentScene;
@@ -109,7 +122,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
     const selectedElement = getSelectedElement(getState());
 
     updateGlobalPositions(
-      (elementId, position) => dispatch(setPosition(elementId, page, position)),
+      positions => dispatch(setMultiplePositions(positions.map(p => ({ ...p, pageId: page })))),
       nextScene,
       elements
     );
@@ -159,6 +172,11 @@ export const aeroelastic = ({ dispatch, getState }) => {
       // Create the aeroelastic store, which happens once per page creation; disposed on workbook change.
       // TODO: consider implementing a store removal upon page removal to reclaim a small amount of storage
       pages.map(p => p.id).forEach(createStore);
+    }
+
+    if (action.type === restoreHistory.toString()) {
+      aero.clearStores();
+      action.payload.workpad.pages.map(p => p.id).forEach(createStore);
     }
 
     if (action.type === appReady.toString()) {
@@ -212,11 +230,11 @@ export const aeroelastic = ({ dispatch, getState }) => {
 
         break;
 
-      case removeElement.toString():
+      case removeElements.toString():
       case addElement.toString():
       case duplicateElement.toString():
       case elementLayer.toString():
-      case setPosition.toString():
+      case setMultiplePositions.toString():
         const page = getSelectedPage(getState());
         const elements = getElements(getState(), page);
 
@@ -225,7 +243,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
           prevPage !== page || !shallowEqual(prevElements.map(id), elements.map(id));
         if (shouldResetState) populateWithElements(page);
 
-        if (action.type !== setPosition.toString()) unselectShape(prevPage);
+        if (action.type !== setMultiplePositions.toString()) unselectShape(prevPage);
 
         break;
     }

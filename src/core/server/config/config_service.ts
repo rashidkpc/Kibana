@@ -17,14 +17,15 @@
  * under the License.
  */
 
+import { Type } from '@kbn/config-schema';
 import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
 import { Config, ConfigPath, ConfigWithSchema, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
-import { Type } from './schema';
 
+/** @internal */
 export class ConfigService {
   private readonly log: Logger;
 
@@ -107,11 +108,18 @@ export class ConfigService {
     return true;
   }
 
-  public async getUnusedPaths(): Promise<string[]> {
+  public async getUnusedPaths() {
     const config = await this.config$.pipe(first()).toPromise();
     const handledPaths = this.handledPaths.map(pathToString);
 
     return config.getFlattenedPaths().filter(path => !isPathHandled(path, handledPaths));
+  }
+
+  public async getUsedPaths() {
+    const config = await this.config$.pipe(first()).toPromise();
+    const handledPaths = this.handledPaths.map(pathToString);
+
+    return config.getFlattenedPaths().filter(path => isPathHandled(path, handledPaths));
   }
 
   private createConfig<TSchema extends Type<any>, TConfig>(
@@ -146,7 +154,10 @@ export class ConfigService {
   private getDistinctConfig(path: ConfigPath) {
     this.markAsHandled(path);
 
-    return this.config$.pipe(map(config => config.get(path)), distinctUntilChanged(isEqual));
+    return this.config$.pipe(
+      map(config => config.get(path)),
+      distinctUntilChanged(isEqual)
+    );
   }
 
   private markAsHandled(path: ConfigPath) {

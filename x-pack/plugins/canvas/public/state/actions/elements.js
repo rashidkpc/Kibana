@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { interpretAst } from '@kbn/interpreter/public';
 import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
 import { set, del } from 'object-path-immutable';
 import { get, pick, cloneDeep, without } from 'lodash';
+import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';
 import { getPages, getElementById, getSelectedPageIndex } from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
-import { toExpression, safeElementFromExpression } from '../../../common/lib/ast';
 import { notify } from '../../lib/notify';
 import { runInterpreter } from '../../lib/run_interpreter';
-import { interpretAst } from '../../lib/interpreter';
 import { selectElement } from './transient';
 import * as args from './resolved_args';
 
@@ -46,10 +46,8 @@ function getBareElement(el, includeId = false) {
 
 export const elementLayer = createAction('elementLayer');
 
-export const setPosition = createAction('setPosition', (elementId, pageId, position) => ({
-  pageId,
-  elementId,
-  position,
+export const setMultiplePositions = createAction('setMultiplePosition', repositionedElements => ({
+  repositionedElements,
 }));
 
 export const flushContext = createAction('flushContext');
@@ -204,17 +202,20 @@ export const duplicateElement = createThunk(
   }
 );
 
-export const removeElement = createThunk(
-  'removeElement',
-  ({ dispatch, getState }, elementId, pageId) => {
-    const element = getElementById(getState(), elementId, pageId);
-    const shouldRefresh = element.filter != null && element.filter.length > 0;
+export const removeElements = createThunk(
+  'removeElements',
+  ({ dispatch, getState }, elementIds, pageId) => {
+    const shouldRefresh = elementIds.some(elementId => {
+      const element = getElementById(getState(), elementId, pageId);
+      const filterIsApplied = element.filter != null && element.filter.length > 0;
+      return filterIsApplied;
+    });
 
-    const _removeElement = createAction('removeElement', (elementId, pageId) => ({
+    const _removeElements = createAction('removeElements', (elementIds, pageId) => ({
       pageId,
-      elementId,
+      elementIds,
     }));
-    dispatch(_removeElement(elementId, pageId));
+    dispatch(_removeElements(elementIds, pageId));
 
     if (shouldRefresh) dispatch(fetchAllRenderables());
   }

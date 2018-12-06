@@ -12,8 +12,10 @@ import { fetchAllRenderables } from './elements';
 
 export const sizeWorkpad = createAction('sizeWorkpad');
 export const setName = createAction('setName');
+export const setWriteable = createAction('setWriteable');
 export const setColors = createAction('setColors');
 export const setRefreshInterval = createAction('setRefreshInterval');
+export const setWorkpadCSS = createAction('setWorkpadCSS');
 
 export const initializeWorkpad = createThunk('initializeWorkpad', ({ dispatch }) => {
   dispatch(fetchAllRenderables());

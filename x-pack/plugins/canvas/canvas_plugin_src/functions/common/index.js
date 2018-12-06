@@ -11,7 +11,6 @@ import { asFn } from './as';
 import { axisConfig } from './axisConfig';
 import { compare } from './compare';
 import { containerStyle } from './containerStyle';
-import { clog } from './clog';
 import { context } from './context';
 import { columns } from './columns';
 import { csv } from './csv';
@@ -40,6 +39,7 @@ import { palette } from './palette';
 import { pie } from './pie';
 import { plot } from './plot';
 import { ply } from './ply';
+import { progress } from './progress';
 import { render } from './render';
 import { replace } from './replace';
 import { rounddate } from './rounddate';
@@ -64,7 +64,6 @@ export const functions = [
   any,
   asFn,
   axisConfig,
-  clog,
   columns,
   compare,
   containerStyle,
@@ -95,6 +94,7 @@ export const functions = [
   pie,
   plot,
   ply,
+  progress,
   render,
   repeatImage,
   replace,

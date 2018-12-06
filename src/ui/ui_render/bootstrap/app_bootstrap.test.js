@@ -22,7 +22,7 @@ import { resolve } from 'path';
 
 const mockTemplate = `
 {{appId}}
-{{bundlePath}}
+{{regularBundlePath}}
 {{i18n 'foo' '{"defaultMessage": "bar"}'}}
 `;
 
@@ -56,15 +56,6 @@ describe('ui_render/AppBootstrap', () => {
 
       expect(contents).toContain('123');
       expect(contents).toContain('/foo/bar');
-    });
-
-    test('supports i18n', async () => {
-      expect.assertions(1);
-
-      const bootstrap = new AppBootstrap(mockConfig());
-      const contents = await bootstrap.getJsFile();
-
-      expect(contents).toContain('translated foo');
     });
   });
 
@@ -111,28 +102,7 @@ describe('ui_render/AppBootstrap', () => {
         ...mockConfig(),
         templateData: {
           appId: 'not123',
-          bundlePath: 'not/foo/bar'
-        }
-      };
-      const bootstrap2 = new AppBootstrap(config2);
-      const hash2 = await bootstrap2.getJsFileHash();
-
-      expect(typeof hash2).toEqual('string');
-      expect(hash2).toHaveLength(40);
-      expect(hash2).not.toEqual(hash1);
-    });
-
-    test('resolves to different 40 character string with different translations', async () => {
-      expect.assertions(3);
-
-      const bootstrap1 = new AppBootstrap(mockConfig());
-      const hash1 = await bootstrap1.getJsFileHash();
-
-      const config2 = {
-        ...mockConfig(),
-        translations: {
-          locale: 'en',
-          foo: 'not translated foo'
+          regularBundlePath: 'not/foo/bar'
         }
       };
       const bootstrap2 = new AppBootstrap(config2);
@@ -147,13 +117,9 @@ describe('ui_render/AppBootstrap', () => {
 
 function mockConfig() {
   return {
-    translations: {
-      locale: 'en',
-      foo: 'translated foo'
-    },
     templateData: {
       appId: 123,
-      bundlePath: '/foo/bar'
+      regularBundlePath: '/foo/bar'
     }
   };
 }

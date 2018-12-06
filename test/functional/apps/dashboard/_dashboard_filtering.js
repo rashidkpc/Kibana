@@ -210,11 +210,11 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('tsvb top n', async () => {
-        await dashboardExpect.tsvbTopNValuesExist(['6,308.13', '6,308.13']);
+        await dashboardExpect.tsvbTopNValuesExist(['6,308.125', '6,308.125']);
       });
 
       it('tsvb markdown', async () => {
-        await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.29']);
+        await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.286']);
       });
 
       it('saved searches', async () => {
@@ -240,6 +240,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.pieSliceCount(5);
 
+        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await queryBar.setQuery('weightLbs:>50');
         await queryBar.submitQuery();
@@ -259,6 +260,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('Nested visualization filter pills filters data as expected', async () => {
+        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
@@ -273,6 +275,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('Removing filter pills and query unfiters data as expected', async () => {
+        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();

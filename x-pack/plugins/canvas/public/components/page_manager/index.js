@@ -7,14 +7,21 @@
 import { connect } from 'react-redux';
 import { compose, withState } from 'recompose';
 import * as pageActions from '../../state/actions/pages';
-import { getSelectedPage, getWorkpad, getPages } from '../../state/selectors/workpad';
+import { canUserWrite } from '../../state/selectors/app';
+import { getSelectedPage, getWorkpad, getPages, isWriteable } from '../../state/selectors/workpad';
 import { PageManager as Component } from './page_manager';
 
-const mapStateToProps = state => ({
-  pages: getPages(state),
-  selectedPage: getSelectedPage(state),
-  workpadId: getWorkpad(state).id,
-});
+const mapStateToProps = state => {
+  const { id, css } = getWorkpad(state);
+
+  return {
+    isWriteable: isWriteable(state) && canUserWrite(state),
+    pages: getPages(state),
+    selectedPage: getSelectedPage(state),
+    workpadId: id,
+    workpadCSS: css,
+  };
+};
 
 const mapDispatchToProps = dispatch => ({
   addPage: () => dispatch(pageActions.addPage()),
