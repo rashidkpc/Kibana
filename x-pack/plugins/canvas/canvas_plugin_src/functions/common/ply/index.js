@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { groupBy, flatten, pick, map } from 'lodash';
+import { flatten, pick, map } from 'lodash';
+import { groupTable } from './lib/group_table';
 
 function combineColumns(arrayOfColumnsArrays) {
   return arrayOfColumnsArrays.reduce((resultingColumns, columns) => {
@@ -92,18 +93,8 @@ export const ply = () => ({
     let originalDatatables;
 
     if (args.by) {
-      byColumns = args.by.map(by => {
-        const column = context.columns.find(column => column.name === by);
-        if (!column) {
-          throw new Error(`Column not found: '${by}'`);
-        }
-        return column;
-      });
-      const keyedDatatables = groupBy(context.rows, row => JSON.stringify(pick(row, args.by)));
-      originalDatatables = Object.values(keyedDatatables).map(rows => ({
-        ...context,
-        rows,
-      }));
+      originalDatatables = groupTable(context, args.by);
+      byColumns = args.by.map(by => context.columns.find(column => column.name === by));
     } else {
       originalDatatables = [context];
     }
