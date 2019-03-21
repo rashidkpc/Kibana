@@ -13,14 +13,14 @@ export const groupTable = (table, columns = []) => {
 
   // Make sure columns exist
   columns.forEach(by => {
-    const column = context.columns.find(column => column.name === by);
+    const column = table.columns.find(column => column.name === by);
     if (!column) {
       throw new Error(`Column not found: '${by}'`);
     }
   });
-  const keyedDatatables = groupBy(context.rows, row => JSON.stringify(pick(row, columns)));
+  const keyedDatatables = groupBy(table.rows, row => JSON.stringify(pick(row, columns)));
   return Object.values(keyedDatatables).map(rows => ({
-    ...context,
+    ...table,
     rows,
   }));
 };
