@@ -45,6 +45,7 @@ import { render } from './render';
 import { replace } from './replace';
 import { rounddate } from './rounddate';
 import { rowCount } from './rowCount';
+import { repeatElement } from './repeatElement';
 import { repeatImage } from './repeatImage';
 import { revealImage } from './revealImage';
 import { seriesStyle } from './seriesStyle';
@@ -98,6 +99,7 @@ export const functions = [
   ply,
   progress,
   render,
+  repeatElement,
   repeatImage,
   replace,
   revealImage,
