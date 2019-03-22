@@ -23,7 +23,7 @@ const branches = [
   // no renderable or renderable config value, render loading
   branch(({ renderable, state }) => {
     return !state || !renderable;
-  }, renderComponent(() => <Loading />)),
+  }, renderComponent(({}) => <Loading backgroundColor="#ffffff" />)),
   // renderable is available, but no matching element is found, render invalid
   branch(({ renderable, renderFunction }) => {
     return renderable && getType(renderable) !== 'render' && !renderFunction;
