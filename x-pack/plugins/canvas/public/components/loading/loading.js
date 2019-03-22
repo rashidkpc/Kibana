@@ -6,10 +6,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiLoadingSpinner, EuiIcon, isColorDark } from '@elastic/eui';
-import { hexToRgb } from '../../../common/lib/hex_to_rgb';
+import { EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
 
-export const Loading = ({ animated, text, backgroundColor }) => {
+export const Loading = ({ animated, text }) => {
   if (animated) {
     return (
       <div className="canvasLoading">
@@ -24,8 +23,6 @@ export const Loading = ({ animated, text, backgroundColor }) => {
     );
   }
 
-  const rgb = hexToRgb(backgroundColor);
-
   return (
     <div className="canvasLoading">
       {text && (
@@ -34,7 +31,7 @@ export const Loading = ({ animated, text, backgroundColor }) => {
           &nbsp;
         </span>
       )}
-      <EuiIcon color={rgb && isColorDark(...rgb) ? 'ghost' : 'text'} type="clock" />
+      <EuiIcon type="clock" />
     </div>
   );
 };
