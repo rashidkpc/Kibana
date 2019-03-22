@@ -9,6 +9,7 @@ import { dropdownFilter } from './dropdown_filter';
 import { debug } from './debug';
 import { error } from './error';
 import { image } from './image';
+import { repeatElement } from './repeat_element';
 import { repeatImage } from './repeat_image';
 import { revealImage } from './reveal_image';
 import { markdown } from './markdown';
@@ -28,6 +29,7 @@ export const renderFunctions = [
   error,
   image,
   repeatImage,
+  repeatElement,
   revealImage,
   markdown,
   metric,
