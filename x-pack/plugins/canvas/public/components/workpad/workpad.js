@@ -32,6 +32,8 @@ export class Workpad extends React.PureComponent {
     previousPage: PropTypes.func.isRequired,
     fetchAllRenderables: PropTypes.func.isRequired,
     css: PropTypes.object,
+    registerLayout: PropTypes.func.isRequired,
+    unregisterLayout: PropTypes.func.isRequired,
   };
 
   keyHandler = action => {
@@ -83,6 +85,8 @@ export class Workpad extends React.PureComponent {
       workpadCss,
       grid,
       isFullscreen,
+      registerLayout,
+      unregisterLayout,
     } = this.props;
 
     const bufferStyle = {
@@ -115,34 +119,38 @@ export class Workpad extends React.PureComponent {
               // NOTE: the data-shared-* attributes here are used for reporting
               return Style.it(
                 workpadCss,
-                <div
-                  className={`canvasWorkpad ${isFullscreen ? 'fullscreen' : ''}`}
-                  style={fsStyle}
-                  data-shared-items-count={totalElementCount}
-                >
-                  {isFullscreen && (
-                    <Shortcuts
-                      name="PRESENTATION"
-                      handler={this.keyHandler}
-                      targetNodeSelector="body"
-                      global
+                  <div>
+                    <div
+                    className={`canvasWorkpad ${isFullscreen ? 'fullscreen' : ''}`}
+                    style={fsStyle}
+                    data-shared-items-count={totalElementCount}
+                  >
+                    {isFullscreen && (
+                      <Shortcuts
+                        name="PRESENTATION"
+                        handler={this.keyHandler}
+                        targetNodeSelector="body"
+                        global
+                      />
+                    )}
+                    {pages.map((page, i) => (
+                      <WorkpadPage
+                        key={page.id}
+                        pageId={page.id}
+                        height={height}
+                        width={width}
+                        isSelected={i + 1 === selectedPageNumber}
+                        animation={getAnimation(i + 1)}
+                        onAnimationEnd={onTransitionEnd}
+                        registerLayout={registerLayout}
+                        unregisterLayout={unregisterLayout}
+                      />
+                    ))}
+                    <div
+                      className="canvasGrid"
+                      style={{ height, width, display: grid ? 'block' : 'none' }}
                     />
-                  )}
-                  {pages.map((page, i) => (
-                    <WorkpadPage
-                      key={page.id}
-                      pageId={page.id}
-                      height={height}
-                      width={width}
-                      isSelected={i + 1 === selectedPageNumber}
-                      animation={getAnimation(i + 1)}
-                      onAnimationEnd={onTransitionEnd}
-                    />
-                  ))}
-                  <div
-                    className="canvasGrid"
-                    style={{ height, width, display: grid ? 'block' : 'none' }}
-                  />
+                  </div>
                 </div>
               );
             }}
